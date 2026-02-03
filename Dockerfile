@@ -34,6 +34,10 @@ ENV NODE_ENV=production
 # Allow non-root user to write temp files during runtime/tests.
 RUN chown -R node:node /app
 
+# Create /data directory and set ownership for the node user
+# Railway/cloud platforms mount volumes here
+RUN mkdir -p /data && chown -R node:node /data
+
 # Security hardening: Run as non-root user
 # The node:22-bookworm image includes a 'node' user (uid 1000)
 # This reduces the attack surface by preventing container escape via root privileges
