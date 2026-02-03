@@ -1,5 +1,11 @@
 FROM node:22-bookworm
 
+# Install su-exec for secure user switching
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends su-exec && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
 # Install Bun (required for build scripts)
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
@@ -34,19 +40,22 @@ ENV NODE_ENV=production
 # Allow non-root user to write temp files during runtime/tests.
 RUN chown -R node:node /app
 
-# Create /data directory and set ownership for the node user
-# Railway/cloud platforms mount volumes here
-RUN mkdir -p /data && chown -R node:node /data
+# Create /data directory for volume mounts
+# Permissions will be fixed at runtime by entrypoint script
+RUN mkdir -p /data
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
-USER node
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set entrypoint (runs as root to fix permissions, then switches to node user)
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Start gateway server with default config.
 # Binds to loopback (127.0.0.1) by default for security.
 #
 # For container platforms (Railway, Fly.io, etc.):
-# - Automatically detects PORT env var and binds to 0.0.0.0:$PORT
+# - PORT env var is read by the gateway at runtime
+# - Entrypoint fixes /data permissions then switches to node user
 # - Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD for API auth
 CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --bind lan --port ${PORT:-8080}"]
