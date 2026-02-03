@@ -42,7 +42,12 @@ USER node
 # Start gateway server with default config.
 # Binds to loopback (127.0.0.1) by default for security.
 #
-# For container platforms requiring external health checks:
-#   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
+# For container platforms (Railway, Fly.io, etc.):
+# - Uses PORT env var if set, otherwise defaults to loopback-only mode
+# - Binds to lan (0.0.0.0) when PORT is set for external access
+# - Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD for API auth
+CMD sh -c 'if [ -n "$PORT" ]; then \
+  node dist/index.js gateway --allow-unconfigured --bind lan --port "$PORT"; \
+else \
+  node dist/index.js gateway --allow-unconfigured; \
+fi'

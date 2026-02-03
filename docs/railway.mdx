@@ -92,10 +92,12 @@ Use the template link above (if available). Follow the same configuration steps 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `SETUP_PASSWORD` | Yes | - | Password for accessing `/setup` wizard |
-| `PORT` | Yes | `8080` | Port the gateway listens on (must match Railway's exposed port) |
+| `PORT` | Yes | `8080` | Port the gateway listens on (Railway auto-configures routing) |
 | `OPENCLAW_STATE_DIR` | Yes | `/data/.openclaw` | Where OpenClaw stores config and credentials |
 | `OPENCLAW_WORKSPACE_DIR` | Yes | `/data/workspace` | Workspace directory for agent files |
 | `OPENCLAW_GATEWAY_TOKEN` | Recommended | - | Admin token for gateway API access (generate a secure random string) |
+
+**Note:** The Dockerfile automatically detects the `PORT` environment variable and configures the gateway to bind to `0.0.0.0:$PORT` for external access.
 
 ### Volume configuration
 

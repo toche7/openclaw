@@ -100,9 +100,10 @@ This repository includes:
 ## Troubleshooting
 
 ### Deployment fails
-- Check that all required environment variables are set
+- Check that all required environment variables are set (especially `PORT=8080`)
 - Verify the volume is properly mounted at `/data`
 - Check Railway logs: Service → **Deployments** → Click on your deployment
+- If you see "Invalid port" errors, ensure `PORT` is set to a numeric value like `8080`
 
 ### Cannot access the web UI
 - Make sure you generated a domain in Railway settings
