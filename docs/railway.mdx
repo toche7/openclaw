@@ -8,29 +8,75 @@ and you configure everything via the `/setup` web wizard.
 
 ## Quick checklist (new users)
 
-1. Click **Deploy on Railway** (below).
-2. Add a **Volume** mounted at `/data`.
-3. Set the required **Variables** (at least `SETUP_PASSWORD`).
-4. Enable **HTTP Proxy** on port `8080`.
-5. Open `https://<your-railway-domain>/setup` and finish the wizard.
+1. **Fork or clone** the OpenClaw repository to your GitHub account.
+2. **Create a new Railway project** from your GitHub repo.
+3. Add a **Volume** mounted at `/data`.
+4. Set the required **Variables** (at least `SETUP_PASSWORD`).
+5. **Generate Domain** to get a public URL.
+6. Open `https://<your-railway-domain>/setup` and finish the wizard.
 
-## One-click deploy
+## Method 1: Deploy from GitHub (Recommended)
+
+This method allows you to track updates and customize your deployment.
+
+### Step 1: Prepare your repository
+
+Fork or clone the OpenClaw repository:
+
+```bash
+gh repo fork openclaw/openclaw --clone
+cd openclaw
+```
+
+Or manually fork it on GitHub at https://github.com/openclaw/openclaw
+
+### Step 2: Create Railway project
+
+1. Go to [Railway](https://railway.app/) and sign in
+2. Click **New Project**
+3. Select **Deploy from GitHub repo**
+4. Choose your forked `openclaw` repository
+5. Railway will automatically detect the `railway.json` configuration and build from the Dockerfile
+
+### Step 3: Configure the service
+
+After Railway creates the service, configure it:
+
+**Add a Volume:**
+- Go to your service → **Settings** → **Volumes**
+- Click **New Volume**
+- Mount Path: `/data`
+- Size: At least 1GB
+
+**Set Environment Variables:**
+- Go to **Variables** tab
+- Add these required variables:
+  ```
+  SETUP_PASSWORD = (your secure password for /setup access)
+  PORT = 8080
+  OPENCLAW_STATE_DIR = /data/.openclaw
+  OPENCLAW_WORKSPACE_DIR = /data/workspace
+  OPENCLAW_GATEWAY_TOKEN = (generate a random secure token)
+  ```
+
+**Generate Domain:**
+- Go to **Settings** → **Networking**
+- Click **Generate Domain** to get your public URL (like `https://<something>.up.railway.app`)
+
+### Step 4: Access your deployment
+
+Once deployed, Railway will provide a public URL. Then open:
+
+- `https://<your-railway-domain>/setup` — setup wizard (password protected)
+- `https://<your-railway-domain>/openclaw` — Control UI
+
+## Method 2: One-click deploy (Template)
 
 <a href="https://railway.com/deploy/clawdbot-railway-template" target="_blank" rel="noreferrer">
   Deploy on Railway
 </a>
 
-After deploy, find your public URL in **Railway → your service → Settings → Domains**.
-
-Railway will either:
-
-- give you a generated domain (often `https://<something>.up.railway.app`), or
-- use your custom domain if you attached one.
-
-Then open:
-
-- `https://<your-railway-domain>/setup` — setup wizard (password protected)
-- `https://<your-railway-domain>/openclaw` — Control UI
+Use the template link above (if available). Follow the same configuration steps from Method 1 after deployment.
 
 ## What you get
 
@@ -39,29 +85,34 @@ Then open:
 - Persistent storage via Railway Volume (`/data`) so config/credentials/workspace survive redeploys
 - Backup export at `/setup/export` to migrate off Railway later
 
-## Required Railway settings
+## Configuration details
 
-### Public Networking
+### Environment variables
 
-Enable **HTTP Proxy** for the service.
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SETUP_PASSWORD` | Yes | - | Password for accessing `/setup` wizard |
+| `PORT` | Yes | `8080` | Port the gateway listens on (must match Railway's exposed port) |
+| `OPENCLAW_STATE_DIR` | Yes | `/data/.openclaw` | Where OpenClaw stores config and credentials |
+| `OPENCLAW_WORKSPACE_DIR` | Yes | `/data/workspace` | Workspace directory for agent files |
+| `OPENCLAW_GATEWAY_TOKEN` | Recommended | - | Admin token for gateway API access (generate a secure random string) |
 
-- Port: `8080`
+### Volume configuration
 
-### Volume (required)
+Railway requires a persistent volume to survive redeploys:
 
-Attach a volume mounted at:
+- **Mount Path**: `/data`
+- **Size**: At least 1GB (adjust based on your workspace needs)
 
-- `/data`
+Without a volume, all configuration and workspace data will be lost on each deploy.
 
-### Variables
+### Networking
 
-Set these variables on the service:
+Railway automatically handles networking when you generate a domain:
 
-- `SETUP_PASSWORD` (required)
-- `PORT=8080` (required — must match the port in Public Networking)
-- `OPENCLAW_STATE_DIR=/data/.openclaw` (recommended)
-- `OPENCLAW_WORKSPACE_DIR=/data/workspace` (recommended)
-- `OPENCLAW_GATEWAY_TOKEN` (recommended; treat as an admin secret)
+- The service listens on `0.0.0.0:$PORT` (configured via `--bind lan` flag)
+- Railway proxies HTTPS traffic to your container
+- No additional port configuration needed
 
 ## Setup flow
 

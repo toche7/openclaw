@@ -21,7 +21,8 @@ export type AuthChoiceGroupId =
   | "minimax"
   | "synthetic"
   | "venice"
-  | "qwen";
+  | "qwen"
+  | "groq";
 
 export type AuthChoiceGroup = {
   value: AuthChoiceGroupId;
@@ -120,6 +121,12 @@ const AUTH_CHOICE_GROUP_DEFS: {
     hint: "Privacy-focused (uncensored models)",
     choices: ["venice-api-key"],
   },
+  {
+    value: "groq",
+    label: "Groq",
+    hint: "Fast inference (Llama, Mixtral, Whisper)",
+    choices: ["groq-api-key"],
+  },
 ];
 
 export function buildAuthChoiceOptions(params: {
@@ -153,6 +160,11 @@ export function buildAuthChoiceOptions(params: {
     value: "venice-api-key",
     label: "Venice AI API key",
     hint: "Privacy-focused inference (uncensored models)",
+  });
+  options.push({
+    value: "groq-api-key",
+    label: "Groq API key",
+    hint: "Fast inference (Llama, Mixtral, Whisper)",
   });
   options.push({
     value: "github-copilot",
