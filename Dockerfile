@@ -43,11 +43,6 @@ USER node
 # Binds to loopback (127.0.0.1) by default for security.
 #
 # For container platforms (Railway, Fly.io, etc.):
-# - Uses PORT env var if set, otherwise defaults to loopback-only mode
-# - Binds to lan (0.0.0.0) when PORT is set for external access
+# - Automatically detects PORT env var and binds to 0.0.0.0:$PORT
 # - Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD for API auth
-CMD sh -c 'if [ -n "$PORT" ]; then \
-  node dist/index.js gateway --allow-unconfigured --bind lan --port "$PORT"; \
-else \
-  node dist/index.js gateway --allow-unconfigured; \
-fi'
+CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --bind lan --port ${PORT:-8080}"]
