@@ -240,6 +240,14 @@ export function createGatewayHttpServer(opts: {
     }
 
     try {
+      // Health check endpoint (no auth required for Railway/Docker/k8s health checks)
+      if (req.url === "/health" || req.url === "/healthz") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.end("ok");
+        return;
+      }
+
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
       if (await handleHooksRequest(req, res)) {

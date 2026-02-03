@@ -108,11 +108,13 @@ This repository includes:
 - Make sure you generated a domain in Railway settings
 - Verify `PORT=8080` is set in environment variables
 - Check that the service is running in Railway dashboard
+- Test the health endpoint first: `https://<your-domain>/health` (should return "ok")
 
 ### Setup wizard won't load
 - Confirm `SETUP_PASSWORD` is set
 - Check that the domain is accessible
-- Try accessing `/health` endpoint first to verify service is running
+- Try accessing the health endpoint first: `https://<your-domain>/health` (should return "ok")
+- Check Railway deployment logs for errors
 
 ## Backups & Migration
 
